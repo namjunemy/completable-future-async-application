@@ -1,4 +1,5 @@
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 public class ShopApplication {
 
@@ -13,7 +14,7 @@ public class ShopApplication {
 
         doSomethingElse();
         try {
-            double price = futurePrice.get(); //가격 정보가 있으면 Future에서 가격 정보를 읽고, 없으면 받을 때까지 블록한다.
+            double price = futurePrice.get(3, TimeUnit.SECONDS); //가격 정보가 있으면 Future에서 가격 정보를 읽고, 없으면 받을 때까지 블록한다.
             System.out.println("price: " + price);
         } catch (Exception e) {
             throw new RuntimeException(e);

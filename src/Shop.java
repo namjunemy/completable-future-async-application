@@ -17,8 +17,12 @@ public class Shop {
         CompletableFuture<Double> futurePrice = new CompletableFuture<>();
 
         new Thread(() -> {
-            double price = calculatePrice(product); //다른 스레드에서 비동기적으로 계산을 수행
-            futurePrice.complete(price);            //오랜 시간이 걸리는 계산이 완료되면 Future에 값을 설정
+            try {
+                double price = calculatePrice(product); //다른 스레드에서 비동기적으로 계산을 수행
+                futurePrice.complete(price);    //계산이 정상적으로 종료되면 Future에 가격 정보를 저장한 채로 Future를 종료한다.
+            } catch (Exception ex) {
+                futurePrice.completeExceptionally(ex);  //도중에 문제가 발생하면 발생한 에러를 포함시켜 Future를 종료한다.
+            }
         }).start();
 
         return futurePrice; //계산 결과가 완료되길 기다리지 않고 Future를 반환한다.

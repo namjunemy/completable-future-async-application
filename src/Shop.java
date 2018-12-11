@@ -13,19 +13,11 @@ public class Shop {
      * @return double price
      */
     public Future<Double> getPriceAsync(String product) {
-        //계산 결과를 포함할 CompletableFuture를 생성
-        CompletableFuture<Double> futurePrice = new CompletableFuture<>();
-
-        new Thread(() -> {
-            try {
-                double price = calculatePrice(product); //다른 스레드에서 비동기적으로 계산을 수행
-                futurePrice.complete(price);    //계산이 정상적으로 종료되면 Future에 가격 정보를 저장한 채로 Future를 종료한다.
-            } catch (Exception ex) {
-                futurePrice.completeExceptionally(ex);  //도중에 문제가 발생하면 발생한 에러를 포함시켜 Future를 종료한다.
-            }
-        }).start();
-
-        return futurePrice; //계산 결과가 완료되길 기다리지 않고 Future를 반환한다.
+        /**
+         * 반환하는 CompletableFuture는 직접 만들고 completeExceptionally() 처리한 CompletableFuture와 같다.
+         * 즉, 둘 다 같은 방법으로 에러를 관리한다.
+         */
+        return CompletableFuture.supplyAsync(() -> calculatePrice(product));
     }
 
     /**

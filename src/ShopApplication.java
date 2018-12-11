@@ -1,30 +1,32 @@
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
+import static java.util.stream.Collectors.toList;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class ShopApplication {
 
+    private List<Shop> shops = Arrays.asList(
+        new Shop("apple"),
+        new Shop("samsung"),
+        new Shop("nokia"),
+        new Shop("blackberry")
+    );
+
     public static void main(String[] args) {
-        Shop shop = new Shop();
+        ShopApplication shopApplication = new ShopApplication();
 
-        //Start
         long start = System.nanoTime();
-        Future<Double> futurePrice = shop.getPriceAsync("nike");
+        System.out.println(shopApplication.findPrices("myphoneX"));
         long invocationTime = ((System.nanoTime() - start) / 1_000_000);
-        System.out.println("호출이 리턴되는 시간: " + invocationTime + "msecs");
 
-        doSomethingElse();
-        try {
-            double price = futurePrice.get(3, TimeUnit.SECONDS); //가격 정보가 있으면 Future에서 가격 정보를 읽고, 없으면 받을 때까지 블록한다.
-            System.out.println("price: " + price);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        System.out.println("수행 시간: " + invocationTime + "msecs");
 
-        long retrievalTime = ((System.nanoTime() - start) / 1_000_000);
-        System.out.println("가격이 리턴되는 시간: " + retrievalTime + "msecs");
     }
 
-    private static void doSomethingElse() {
-        System.out.println("제품의 가격을 계산하는 동안 다른 작업을 수행중...");
+    public List<String> findPrices(String product) {
+        return shops.stream()
+            .map(shop -> String
+                .format("%s price is %.2f", shop.getName(), shop.calculatePrice(product)))
+            .collect(toList());
     }
 }

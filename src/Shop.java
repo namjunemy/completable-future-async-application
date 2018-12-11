@@ -6,6 +6,12 @@ public class Shop {
 
     private static Random random = new Random();
 
+    private String name;
+
+    public Shop(String name) {
+        this.name = name;
+    }
+
     /**
      * 제품명에 해당하는 가격을 비동기로 반환
      *
@@ -26,17 +32,21 @@ public class Shop {
      * @param product the product name
      * @return random double price
      */
-    private double calculatePrice(String product) {
+    public double calculatePrice(String product) {
         delay();
         return random.nextDouble() * product.charAt(0) + product.charAt(1);
     }
 
     public static void delay() {
         try {
-            Thread.sleep(2000L);
+            Thread.sleep(1000L);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
 
+    }
+
+    public String getName() {
+        return name;
     }
 }

@@ -1,6 +1,4 @@
 import java.util.Random;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
 
 public class Shop {
 
@@ -13,17 +11,15 @@ public class Shop {
     }
 
     /**
-     * 제품명에 해당하는 가격을 비동기로 반환
+     * 제품명에 해당하는 가격 반환
      *
      * @param product the product name
      * @return double price
      */
-    public Future<Double> getPriceAsync(String product) {
-        /**
-         * 반환하는 CompletableFuture는 직접 만들고 completeExceptionally() 처리한 CompletableFuture와 같다.
-         * 즉, 둘 다 같은 방법으로 에러를 관리한다.
-         */
-        return CompletableFuture.supplyAsync(() -> calculatePrice(product));
+    public String getPrice(String product) {
+        double price = calculatePrice(product);
+        Discount.Code code = Discount.Code.values()[random.nextInt(Discount.Code.values().length)];
+        return String.format("%s:%.2f:%s", name, price, code);
     }
 
     /**
@@ -43,7 +39,6 @@ public class Shop {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-
     }
 
     public String getName() {

@@ -1,11 +1,10 @@
-import static java.util.stream.Collectors.toList;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.stream.Stream;
 
 public class ShopApplication {
 
@@ -30,30 +29,30 @@ public class ShopApplication {
         ShopApplication shopApplication = new ShopApplication();
 
         long start = System.nanoTime();
-        System.out.println(shopApplication.findPrices("myphoneX"));
-        long invocationTime = ((System.nanoTime() - start) / 1_000_000);
 
-        System.out.println("수행 시간: " + invocationTime + "msecs");
+        CompletableFuture[] futures = shopApplication.findPricesStream("myPhone")
+            .map(f -> f.thenAccept(
+                s -> System.out.println(s + " (done in " +
+                    ((System.nanoTime() - start) / 1_000_000) + " mecs)")))
+            .toArray(size -> new CompletableFuture[size]);
 
+        CompletableFuture.allOf(futures).join();
+
+        System.out.println("All shops have now responded in " +
+            ((System.nanoTime() - start) / 1_000_000) + " msecs");
     }
 
-    public List<String> findPrices(String product) {
-        List<CompletableFuture<String>> priceFutures =
-            shops.stream()
-                //각 상점에서 할인전 가격을 비동기적으로 얻는다. return Stream<CompletableFuture<String>>
-                .map(shop -> CompletableFuture.supplyAsync(
-                    () -> shop.getPrice(product), executor))
+    public Stream<CompletableFuture<String>> findPricesStream(String product) {
+        return shops.stream()
+            //각 상점에서 할인전 가격을 비동기적으로 얻는다. return Stream<CompletableFuture<String>>
+            .map(shop -> CompletableFuture.supplyAsync(
+                () -> shop.getPrice(product), executor))
 
-                // 상점에서 반환한 문자열을 Quote 객체로 변환한다. return Stream<CompletableFuture<Quote>>
-                .map(future -> future.thenApply(Quote::parse))
+            // 상점에서 반환한 문자열을 Quote 객체로 변환한다. return Stream<CompletableFuture<Quote>>
+            .map(future -> future.thenApply(Quote::parse))
 
-                //결과 Future를 다른 비동기 작업과 조합해서 할인 코드를 적용한다. return Stream<CompletableFuture<String>>
-                .map(future -> future.thenCompose(quote -> CompletableFuture.supplyAsync(
-                    () -> Discount.applyDiscount(quote), executor)))
-                .collect(toList());
-
-        return priceFutures.stream()
-            .map(CompletableFuture::join)   // 스트림의 모든 Future가 종료되길 기다렸다가 각각의 결과를 추출한다.
-            .collect(toList());
+            //결과 Future를 다른 비동기 작업과 조합해서 할인 코드를 적용한다. return Stream<CompletableFuture<String>>
+            .map(future -> future.thenCompose(quote -> CompletableFuture.supplyAsync(
+                () -> Discount.applyDiscount(quote), executor)));
     }
 }

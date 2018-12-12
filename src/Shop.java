@@ -23,19 +23,20 @@ public class Shop {
     }
 
     /**
-     * 실제로 상점 DB등 외부 서비스에 접근해서 가격 정보를 얻는 로직 대신 delay()
+     * 실제로 상점 DB등 외부 서비스에 접근해서 가격 정보를 얻는 로직 대신 randomDelay()
      *
      * @param product the product name
      * @return random double price
      */
     public double calculatePrice(String product) {
-        delay();
+        randomDelay();
         return random.nextDouble() * product.charAt(0) + product.charAt(1);
     }
 
-    public static void delay() {
+    public static void randomDelay() {
+        int delay = 500 + random.nextInt(2000);
         try {
-            Thread.sleep(1000L);
+            Thread.sleep(delay);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
